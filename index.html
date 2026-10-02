@@ -1,176 +1,216 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Milo/Nova — Lightweight Cloud Video Dispatcher</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script type="module">
-        import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client@0.14.3/+esm";
-        window.gradioClient = client;
-    </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #030305; color: #f5f5f7; }
-        .glass-panel { background: rgba(14, 14, 18, 0.85); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.1); }
-    </style>
-</head>
-<body class="w-screen h-screen flex flex-col justify-between items-center overflow-hidden">
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nova Deploy</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20xmlns%3Ac2pa%3D%22http%3A//c2pa.org/manifest%22%3E%3Cmetadata%3E%3Cc2pa%3Amanifest%3EAAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYToyNmZmMjcyNi1jZjc4LTQ4NGItOGJkNy01NGM5NDJhZmY1N2QAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaCk74TSSQtip3NgfPsRqaPEAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpmZTg4ZGQzMS0yMjljLTQyNTAtOWE1YS1mNTEyOTVlZjM5MzJscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNorB04Zzfa7%2BdH5pGOvoKibwAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggS1nZQ91b%2BcGFzZa8l0vCPC/1QlM4%2B9Vf7txaBMZpxuGkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaJhcTP9eVsd8/Q6zhQVoWPwAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRNAAAAAAAAAAAAAAAAAGRoYXNoWCDrryFG37/6OmeNy7U4eI2vYgjLy4uPHbLBetDrvCY2IGRuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBh7Zmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjI2ZmYyNzI2LWNmNzgtNDg0Yi04YmQ3LTU0Yzk0MmFmZjU3ZC9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOmRjNjIwNzJmLTVhMGUtNGM5NS05YThlLTQ2YTE3ZDFiN2YyOHJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCBLWdlD3Vv5wYXNlryXS8I8L/VCUzj71V/u3FoExmnG4aJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggiXyt6edH1Kms/PFhp3VDAxQn6Wq4IgFrJjsnnELD7U2iY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFgg9Xexzf2MTA4rWhPpVoLFaxLDmCMzebJZdBtyqFBvWEB0Y2xhaW1fZ2VuZXJhdG9yX2luZm%2BjZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj%2BOPEz5o%2BnMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1%2BUCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9%2B1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQFnWXaWYxRAzwSK%2BgCVjqt5IADdKUL6zhvryHW7o68Vtse2PK9Y1/jksof/jwvthmpoKkSTY83s0SrV5xnbF%2BiA%3D%3C/c2pa%3Amanifest%3E%3C/metadata%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%232b2b33%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23121216%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2215%22%20fill%3D%22url%28%23g%29%22/%3E%3Cpath%20d%3D%22M32%209%2036.5%2026%2053%2032%2036.5%2038%2032%2055%2027.5%2038%2011%2032%2027.5%2026Z%22%20fill%3D%22%23fff%22/%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%224.2%22%20fill%3D%22%235e6ad2%22/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;510;590&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f4f5;--panel:#fff;--line:#e6e6e8;--ink:#1b1b1f;--mut:#6f6f78;--faint:#a3a3ab;--hov:#ebebed;--accent:#5e6ad2;--ok:#2f9e5b;--bad:#d0453b;--mono:ui-monospace,'SF Mono',Menlo,monospace}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,-apple-system,'SF Pro Display',system-ui,'Segoe UI',sans-serif;font-feature-settings:'cv01','ss03';display:flex;-webkit-font-smoothing:antialiased}
+.mut{color:var(--mut)}.small{font-size:13px;color:var(--mut)}.hide{display:none!important}
+.sb{width:236px;flex-shrink:0;padding:14px 12px;display:flex;flex-direction:column;gap:2px;overflow:auto}
+.ws{display:flex;align-items:center;gap:9px;padding:2px 8px 14px;font-weight:510;font-size:15px}
+.av{width:22px;height:22px;border-radius:6px;background:var(--ok);color:#fff;font-size:10px;font-weight:600;display:grid;place-items:center}
+.ni{display:flex;align-items:center;gap:10px;width:100%;padding:7px 8px;border:0;background:none;border-radius:8px;font:inherit;font-weight:450;color:var(--ink);cursor:pointer;text-align:left;transition:background .12s}
+.ni:hover{background:var(--hov)}.ni.on{background:var(--hov);font-weight:510}.ni svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;color:var(--mut)}
+.lbl{padding:18px 8px 6px;color:var(--mut);font-size:13px}.sm{padding-left:10px;font-size:13.5px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}.dot.g{background:var(--ok)}.dot.r{background:var(--faint)}
+.sbf{margin-top:auto;padding:10px 8px 0;font-size:12px;color:var(--mut);display:flex;flex-direction:column;gap:4px;word-break:break-all}
+.lnk{background:none;border:0;padding:0;font:inherit;color:var(--accent);cursor:pointer;text-align:left}
+.panel{flex:1;min-width:0;margin:10px 10px 10px 0;background:var(--panel);border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;overflow:hidden}
+.crumb{height:46px;flex-shrink:0;padding:0 24px;display:flex;align-items:center;border-bottom:1px solid var(--line);font-weight:510}
+.content{flex:1;min-height:0;overflow:auto}
+.tab{display:none;max-width:780px;margin:0 auto;padding:28px 24px;width:100%}.tab.on{display:block}
+#t-chat.on{display:flex;flex-direction:column;height:100%;padding-bottom:16px}
+.card{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:12px;background:#fff}
+h1{font-size:22px;font-weight:590;letter-spacing:-.4px;margin:0 0 6px}h2{font-size:16px;font-weight:590;letter-spacing:-.2px;margin:0 0 8px}h3{font-size:14px;font-weight:590;margin:0 0 6px}
+label{display:block;font-size:12.5px;font-weight:510;color:var(--mut);margin:12px 0 5px}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font:inherit;color:var(--ink);outline:0}
+input:focus,select:focus{border-color:#b9b9c0}
+.btn{height:30px;padding:0 13px;border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:8px;font:inherit;font-weight:510;font-size:13px;cursor:pointer;margin:12px 6px 0 0}
+.btn.sec{background:#fff;color:var(--ink);border-color:var(--line)}.btn.sec:hover{background:var(--bg)}.btn.bad{background:#fff;color:var(--bad);border-color:var(--line)}.btn:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:12px;flex-wrap:wrap}.row>*{flex:1;min-width:140px}
+code{font:12px var(--mono);background:var(--bg);padding:1px 5px;border-radius:4px;word-break:break-all}
+.pill{display:inline-block;font-size:12px;font-weight:510;margin-left:8px;text-transform:lowercase;vertical-align:middle}.pill::first-letter{text-transform:uppercase}
+.pill::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:currentColor}.on-p{color:var(--ok)}.off-p{color:var(--faint)}
+.stat{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #f0f0f2;font-size:13px}.stat span:first-child{color:var(--mut)}.stat span:last-child{font-family:var(--mono);font-size:12px;text-align:right}
+.bar{height:5px;background:var(--bg);border-radius:3px;margin:8px 0}.bar>i{display:block;height:100%;background:var(--ink);border-radius:3px}
+.plans,.sugs{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:8px}
+.plan,.sug{border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;background:#fff;text-align:left;font:inherit;color:var(--ink);display:flex;flex-direction:column;gap:4px;transition:background .12s}
+.plan:hover,.sug:hover{background:#fafafa}.plan.sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}.plan b{font-size:22px;font-weight:590;letter-spacing:-.5px}
+.sug b{font-weight:510}.sug span{color:var(--mut);font-size:13px}
+.chathead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}.chathead b{font-weight:590;font-size:15px}.chathead select{width:auto;padding:5px 8px}
+#msgs{flex:1;min-height:0;overflow:auto;padding:8px 0}
+.m{margin:14px 0;line-height:1.55;white-space:pre-wrap}.m.u{margin-left:auto;width:fit-content;max-width:72%;background:#f4f4f5;border-radius:12px;padding:10px 14px}
+.gen{margin-top:8px;font-size:12.5px;color:var(--mut)}.gen summary{cursor:pointer}.gen div{margin-top:4px;font:12px var(--mono)}
+.welcome{text-align:center;padding:48px 0 8px}.welcome h2{font-size:22px;letter-spacing:-.4px}.welcome .sugs{text-align:left;margin-top:28px}
+.composer{border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.composer textarea{border:0;padding:0;resize:none;border-radius:0}.crow{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.chip{font:11.5px var(--mono);color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.send{width:30px;height:30px;border-radius:50%;border:0;background:var(--ink);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0}.send:disabled{opacity:.25;cursor:default}
+.err{color:var(--bad);font-size:12.5px;margin-top:8px}.ok{color:var(--ok)}
+#gate{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px}
+.gbox{width:100%;max-width:800px}.gcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:20px}
+@media(max-width:760px){body{flex-direction:column;overflow:auto}.sb{width:100%;flex-direction:row;flex-wrap:wrap;align-items:center}.ws{padding:2px 8px}#nav{display:flex;flex-wrap:wrap}.ni{width:auto}#sbSec,.sbf{display:none}.panel{margin:0 8px 8px;min-height:80vh}}
+#dlg{position:fixed;inset:0;background:rgba(20,20,25,.28);z-index:80;display:flex;align-items:center;justify-content:center;padding:16px}
+.dbox{background:#fff;border-radius:14px;padding:20px;width:min(460px,100%);max-height:90vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.18)}.dbox .plans{grid-template-columns:repeat(3,1fr)}
+</style>
+<style>
+.banner{margin:16px 24px 0;padding:12px 16px;border:1px solid var(--line);border-radius:12px;background:#fafafa;font-size:13.5px}.banner .btn{margin:0 0 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}th{font-weight:510;color:var(--mut);text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 8px;border-bottom:1px solid #f0f0f2;vertical-align:top}tr.row-click{cursor:pointer}tr.row-click:hover{background:#fafafa}.num{text-align:right;font-variant-numeric:tabular-nums}.mono{font-family:var(--mono);font-size:12px}
+.wrapx{overflow-x:auto}pre{background:var(--bg);border-radius:8px;padding:12px;overflow-x:auto;font:12px var(--mono);margin:8px 0}
+.st{display:inline-block;font-size:12px;font-weight:510;padding:1px 9px;border-radius:10px;background:#f1f1f2}.st.active{color:var(--ok);background:rgba(47,158,91,.1)}.st.past_due{color:#b7791f;background:rgba(183,121,31,.12)}.st.cancelled{color:#6f6f78}.st.expired,.st.none{color:var(--bad);background:rgba(208,69,59,.1)}
+.lockmsg{font-size:12.5px;color:var(--mut);margin-top:8px}
+</style>
+</head><body>
+<div id="dlg" class="hide"><div class="dbox" id="dbox"></div></div>
+<aside class="sb"><div class="ws"><svg width="22" height="22" style="flex-shrink:0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYToyNmZmMjcyNi1jZjc4LTQ4NGItOGJkNy01NGM5NDJhZmY1N2QAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaCk74TSSQtip3NgfPsRqaPEAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpmZTg4ZGQzMS0yMjljLTQyNTAtOWE1YS1mNTEyOTVlZjM5MzJscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNorB04Zzfa7+dH5pGOvoKibwAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggS1nZQ91b+cGFzZa8l0vCPC/1QlM4+9Vf7txaBMZpxuGkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaJhcTP9eVsd8/Q6zhQVoWPwAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRNAAAAAAAAAAAAAAAAAGRoYXNoWCDrryFG37/6OmeNy7U4eI2vYgjLy4uPHbLBetDrvCY2IGRuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBh7Zmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjI2ZmYyNzI2LWNmNzgtNDg0Yi04YmQ3LTU0Yzk0MmFmZjU3ZC9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOmRjNjIwNzJmLTVhMGUtNGM5NS05YThlLTQ2YTE3ZDFiN2YyOHJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCBLWdlD3Vv5wYXNlryXS8I8L/VCUzj71V/u3FoExmnG4aJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggiXyt6edH1Kms/PFhp3VDAxQn6Wq4IgFrJjsnnELD7U2iY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFgg9Xexzf2MTA4rWhPpVoLFaxLDmCMzebJZdBtyqFBvWEB0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQFnWXaWYxRAzwSK+gCVjqt5IADdKUL6zhvryHW7o68Vtse2PK9Y1/jksof/jwvthmpoKkSTY83s0SrV5xnbF+iA=</c2pa:manifest></metadata><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b2b33"/><stop offset="1" stop-color="#121216"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#g2)"/><path d="M32 9 36.5 26 53 32 36.5 38 32 55 27.5 38 11 32 27.5 26Z" fill="#fff"/><circle cx="32" cy="32" r="4.2" fill="#5e6ad2"/></svg>Nova Deploy</div><nav id="nav"><button class="ni on" data-t="board"><svg viewBox="0 0 16 16"><path d="M3 13V8M8 13V3M13 13V6"/></svg>Leaderboard</button><button class="ni" data-t="models"><svg viewBox="0 0 16 16"><path d="M8 1.8 13.5 5v6L8 14.2 2.5 11V5z"/><path d="M2.5 5 8 8.2 13.5 5M8 8.2v6"/></svg>My models</button><button class="ni" data-t="create"><svg viewBox="0 0 16 16"><path d="M8 10.5V2.5M4.8 5.5 8 2.3l3.2 3.2M2.5 10v3.2h11V10"/></svg>Create &amp; deploy</button><button class="ni" data-t="test"><svg viewBox="0 0 16 16"><path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z"/></svg>Test</button><button class="ni" data-t="keys"><svg viewBox="0 0 16 16"><circle cx="5.5" cy="10.5" r="2.5"/><path d="M7.4 8.6 13 3M11 5l2 2"/></svg>API keys</button><button class="ni" data-t="billing"><svg viewBox="0 0 16 16"><rect x="2" y="3.5" width="12" height="9" rx="2"/><path d="M2 6.8h12"/></svg>Billing</button></nav>
+<div class="sbf"><div id="miniSub"></div><span id="whoTxt"></span><button class="lnk" id="bAuth">Sign in</button></div></aside>
+<section class="panel"><div class="crumb"><span id="crumb">Leaderboard</span></div>
+<div id="banner" class="banner hide"></div><div id="payMsg" class="small" style="padding:10px 24px 0"></div>
+<div class="content">
+<section class="tab on" id="t-board"><div class="card hide" id="sbSetup"><h2>Connect Supabase</h2><p class="small">Run <code>supabase-setup.sql</code>, deploy the functions, then paste the Project URL and the <b>anon</b> public key (Project Settings → API). Never paste the service-role key.</p>
+<div class="row"><div><label>Project URL</label><input id="sbUrl" placeholder="https://xxxx.supabase.co"></div><div><label>Anon key</label><input id="sbKey" placeholder="eyJ…"></div></div><button class="btn" id="sbSave">Save &amp; connect</button><div class="err" id="sbMsg"></div></div>
+<h2>AI model leaderboard</h2><p class="small">Public rankings of deployed models by replies served. Rankings are for discovery only: nobody can run another creator's model from here.</p><div id="boardBox"></div></section>
+<section class="tab" id="t-models"><div id="mList"></div></section>
+<section class="tab" id="t-create"><div class="card"><h2>1 · Import your trained model</h2><p class="small">Choose <code>nova-model.json</code> or <code>nova-full-backup.json</code> from the Nova training site. Only the trained weights and tokenizer are used. The server validates them and runs the model on its own hardware.</p>
+<input type="file" id="fImp" accept=".json"><div id="impInfo" class="small" style="margin-top:8px"></div></div>
+<div class="card hide" id="stepName"><h2>2 · Name &amp; set up</h2><label>AI name</label><input id="dName" maxlength="40"><label>Description (public)</label><input id="dDesc" maxlength="140">
+<div class="row"><div><label>Temperature</label><input id="dTemp" type="number" step="0.05" min="0.1" max="2" value="0.8"></div><div><label>Top-K</label><input id="dTopK" type="number" min="1" max="200" value="30"></div><div><label>Top-P</label><input id="dTopP" type="number" step="0.05" min="0.1" max="1" value="0.9"></div><div><label>Max tokens / reply</label><input id="dMax" type="number" min="8" max="300" value="80"></div></div>
+<p class="small">Sampling only; the learned weights are never changed.</p><button class="btn" id="bCreate">Upload &amp; deploy</button><div class="err" id="dMsg"></div></div></section>
+<section class="tab" id="t-test" style="padding-bottom:16px"><div class="chathead"><div><b id="chatTitle">Test your model</b></div><select id="cSel" style="width:auto"></select></div>
+<div id="msgs"></div><div class="composer"><textarea id="cIn" rows="2" placeholder="Message your model…"></textarea><div class="crow"><span class="chip" id="cMeta"></span><button class="send" id="bSend">↑</button></div></div><div id="cErr" class="err"></div></section>
+<section class="tab" id="t-keys"><div id="keysBox"></div></section>
+<section class="tab" id="t-billing"><div id="billBox"></div></section>
+</div></section>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* Nova Deploy frontend. It never runs a model and holds no secrets: every protected action goes to the server (Edge Functions + Postgres). */
+const SBCFG={url:'',key:''};
+const $=s=>document.querySelector(s),nf=n=>Number(n||0).toLocaleString(),hex=n=>[...crypto.getRandomValues(new Uint8Array(n))].map(b=>b.toString(16).padStart(2,'0')).join('');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fd=d=>d?new Date(d).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}):'—';
+const ST={active:'Active',past_due:'Past due',cancelled:'Cancelled',expired:'Expired',none:'Not subscribed'};
+const TITLES={board:'Leaderboard',models:'My models',create:'Create & deploy',test:'Test',keys:'API keys',billing:'Billing'};
+const PROTECTED=['models','create','test','keys','billing'];
+let sb=null,SBURL='',S=null,A=null,models=[],pending=null,chatMsgs=[],cur='board';
+function initSB(){let c={};try{c=JSON.parse(localStorage.getItem('novaSB')||'{}')}catch(e){}const url=SBCFG.url||c.url,key=SBCFG.key||c.key;
+ if(!url||!key||!window.supabase)return false;SBURL=url;sb=window.supabase.createClient(url,key,{auth:{persistSession:true}});return true}
+const q=async p=>{const{data,error}=await p;if(error)throw Error(error.message);return data};
+async function call(action,body={}){const r=await sb.functions.invoke('api',{body:{action,...body}});
+ if(r.error){let m=r.error.message,code;try{const j=await r.error.context.json();m=j.error||m;code=j.code}catch(e){}const e=Error(m);e.code=code;throw e}return r.data}
+const money=()=>A?('$'+(A.price_cents/100).toFixed(2).replace(/\.00$/,'')+' / '+A.interval):'';
+const badge=s=>`<span class="st ${s}">${ST[s]}</span>`;
+function fail(e){if(e.code==='subscription_required')needSub();else if(e.code==='insufficient_credits')dlg('<h2>Out of credits</h2><p class="small">This billing period\'s credits are used up. They renew with your next successful payment.</p><button class="btn" data-x>OK</button>');else alert(e.message)}
+const safe=f=>async(...a)=>{try{await f(...a)}catch(e){fail(e)}};
+/* ---- dialogs ---- */
+function dlg(html,wire){const o=$('#dlg'),close=()=>o.classList.add('hide');$('#dbox').innerHTML=html;o.classList.remove('hide');o.onclick=e=>{if(e.target===o)close()};$('#dbox').querySelectorAll('[data-x]').forEach(b=>b.onclick=close);wire&&wire(close)}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#dlg').classList.add('hide')});
+function confirmDlg(msg,fn){dlg(`<p>${msg}</p><button class="btn bad" id="xY">Confirm</button><button class="btn sec" data-x>Cancel</button>`,c=>$('#xY').onclick=safe(async()=>{await fn();c()}))}
+function needSub(){if(!S)return authDlg();dlg(`<h2>Subscription required</h2><p class="small">Creating, testing, deploying and using the API need an active subscription${A&&A.status==='expired'?' (yours expired on '+fd(A.period_end)+')':''}. ${A?money()+' includes '+nf(A.credits_per_period)+' credits per billing period.':''} Browsing the leaderboard stays free.</p><button class="btn" id="xS">Subscribe${A?' · '+money():''}</button><button class="btn sec" data-x>Not now</button><div class="err" id="xE"></div>`,()=>$('#xS').onclick=()=>subscribe().catch(e=>$('#xE').textContent=e.message))}
+/* ---- auth (Supabase Auth; sessions persist) ---- */
+function authDlg(mode='in'){if(!sb){tab('board');return}dlg(`<h2>${mode==='in'?'Sign in':'Create account'}</h2>${mode==='up'?'<label>Display name (shown on the leaderboard)</label><input id="aN" maxlength="40">':''}<label>Email</label><input id="aE" type="email" autocomplete="username"><label>Password</label><input id="aP" type="password" autocomplete="${mode==='in'?'current-password':'new-password'}"><button class="btn" id="aGo">${mode==='in'?'Sign in':'Create account'}</button><button class="btn sec" id="aSw">${mode==='in'?'Create account':'I have an account'}</button><div class="err" id="aM"></div>`,c=>{
+  $('#aSw').onclick=()=>authDlg(mode==='in'?'up':'in');
+  $('#aGo').onclick=async()=>{const e=$('#aE').value.trim().toLowerCase(),p=$('#aP').value,m=$('#aM');m.textContent='';
+   try{if(!/.+@.+/.test(e)||p.length<8)throw Error('Valid email and a password of 8+ characters required');let r;
+    if(mode==='up'){const n=$('#aN').value.trim();if(n.length<2)throw Error('Choose a display name (2+ characters)');r=await sb.auth.signUp({email:e,password:p,options:{data:{display_name:n}}});if(r.error)throw r.error;
+     if(!r.data.session){m.style.color='var(--ok)';m.textContent='Account created. Confirm the email we sent, then sign in.';return}}
+    else{r=await sb.auth.signInWithPassword({email:e,password:p});if(r.error)throw r.error}
+    c();await onSession(r.data.session.user);tab(PROTECTED.includes(cur)?cur:'models')}catch(x){m.style.color='';m.textContent=x.message}}})}
+async function onSession(u){let p=await q(sb.from('profiles').select('display_name').eq('id',u.id).maybeSingle());
+ if(!p){const dn=((u.user_metadata&&u.user_metadata.display_name)||u.email.split('@')[0]).slice(0,40).padEnd(2,'_');await q(sb.from('profiles').insert({id:u.id,display_name:dn}));p={display_name:dn}}
+ S={id:u.id,email:u.email,name:p.display_name};$('#whoTxt').textContent=S.email;$('#bAuth').textContent='Sign out';await refreshAcct();afterPay()}
+$('#bAuth').onclick=async()=>{if(S){await sb.auth.signOut();S=A=null;models=[];chatMsgs=[];$('#whoTxt').textContent='';$('#miniSub').innerHTML='';$('#bAuth').textContent='Sign in';drawBanner();tab('board')}else authDlg()};
+async function refreshAcct(){A=S?await q(sb.rpc('my_account')):null;
+ $('#miniSub').innerHTML=A?`<div>${badge(A.status)}</div><div class="small" style="margin:4px 0">${nf(A.remaining)} credits left</div>`:'';drawBanner()}
+function drawBanner(){const el=$('#banner');if(!S||!A||A.access||cur==='board'){el.classList.add('hide');return}
+ el.classList.remove('hide');el.innerHTML=`<b>Subscription required.</b> ${A.status==='expired'?'Your subscription expired on '+fd(A.period_end)+'. ':''}Creating, testing, deploying and the API are locked until you subscribe. <button class="btn" id="bSubNow">${A.status==='expired'?'Renew':'Subscribe'} · ${money()}</button>`;$('#bSubNow').onclick=()=>subscribe().catch(fail)}
+async function subscribe(){if(!S)return authDlg();const r=await call('checkout');location.href=r.url}   // Stripe-hosted checkout
+async function afterPay(){let f=null;try{f=sessionStorage.getItem('novaPaid');sessionStorage.removeItem('novaPaid')}catch(e){}if(!f)return;
+ const el=$('#payMsg');el.textContent='Payment received. Waiting for Stripe to confirm…';
+ for(let i=0;i<12;i++){await refreshAcct();if(A&&A.access){el.textContent='Subscription active: '+nf(A.remaining)+' credits ready.';setTimeout(()=>el.textContent='',8000);return tab('billing')}await new Promise(r=>setTimeout(r,2000))}
+ el.textContent='Still processing. Your subscription activates automatically once Stripe confirms.'}
+/* ---- navigation ---- */
+function tab(t){if(PROTECTED.includes(t)&&!S)return authDlg();cur=t;
+ document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+t));document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+ $('#crumb').textContent=TITLES[t];drawBanner();({board:loadBoard,models:loadModels,create:drawCreate,test:drawTest,keys:loadKeys,billing:loadBilling})[t]().catch(fail)}
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.t)};
+/* ---- leaderboard: public data only; there is no run/test path for other people's models ---- */
+async function loadBoard(){$('#sbSetup').classList.toggle('hide',!!sb);if(!sb){$('#boardBox').innerHTML='';return}
+ const rows=await q(sb.rpc('leaderboard',{p_limit:50}));
+ $('#boardBox').innerHTML=rows.length?`<div class="wrapx"><table><tr><th>#</th><th>Model</th><th>Creator</th><th>Version</th><th class="num">Replies</th><th class="num">Avg latency</th><th class="num">Training steps</th><th class="num">Parameters</th></tr>${rows.map(r=>`<tr class="row-click" data-id="${esc(r.model_id)}"><td>${r.rank}</td><td><b>${esc(r.name)}</b></td><td>${esc(r.creator)}</td><td class="mono">${esc(r.version)}</td><td class="num">${nf(r.replies)}</td><td class="num">${r.avg_ms==null?'—':r.avg_ms+' ms'}</td><td class="num">${r.steps==null?'—':nf(r.steps)}</td><td class="num">${r.params==null?'—':nf(r.params)}</td></tr>`).join('')}</table></div>`:'<div class="card small">No public models yet.</div>'}
+$('#boardBox').onclick=safe(async e=>{const tr=e.target.closest('tr[data-id]');if(!tr)return;const m=await q(sb.rpc('public_model_info',{p_id:tr.dataset.id}));if(!m)return;
+ dlg(`<h2>${esc(m.name)}</h2><p class="small">${esc(m.description||'No description.')}</p><div class="stat"><span>Creator</span><b>${esc(m.creator)}</b></div><div class="stat"><span>Version</span><b>${esc(m.version)}</b></div><div class="stat"><span>Replies served</span><b>${nf(m.replies)}</b></div><div class="stat"><span>Training steps</span><b>${nf(m.steps)}</b></div><div class="stat"><span>Epochs</span><b>${nf(m.epochs)}</b></div><div class="stat"><span>Parameters</span><b>${nf(m.params)}</b></div><div class="stat"><span>Published</span><b>${fd(m.created)}</b></div><p class="lockmsg">Public information only. Only the creator can run this model.</p><button class="btn sec" data-x>Close</button>`)});
+/* ---- my models ---- */
+async function fetchModels(){models=await q(sb.from('models').select('id,name,version,created,source,settings,deployed,listed').order('created'))}
+async function loadModels(){await fetchModels();$('#mList').innerHTML=models.length?models.map(m=>`<div class="card"><h2>${esc(m.name)} <span class="st ${m.deployed?'active':'none'}">${m.deployed?'Deployed':'Not deployed'}</span> ${m.listed?'':'<span class="st">Unlisted</span>'}</h2><div class="small">${esc(m.settings.desc||'')}</div>
+ <div class="stat"><span>Model ID</span><b>${m.id}</b></div><div class="stat"><span>Version</span><b>${esc(m.version)}</b></div><div class="stat"><span>Parameters</span><b>${nf(m.source.params)}</b></div><div class="stat"><span>Training steps</span><b>${nf(m.source.steps)}</b></div>
+ <button class="btn" data-a="test" data-i="${m.id}">Test</button><button class="btn sec" data-a="edit" data-i="${m.id}">Set up</button><button class="btn sec" data-a="dep" data-i="${m.id}">${m.deployed?'Undeploy':'Deploy'}</button><button class="btn sec" data-a="list" data-i="${m.id}">${m.listed?'Unlist':'List publicly'}</button><button class="btn bad" data-a="del" data-i="${m.id}">Delete</button></div>`).join(''):'<div class="card small">No models yet. Use <b>Create &amp; deploy</b> to import one trained on Nova.</div>'}
+$('#mList').onclick=safe(async e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,m=models.find(x=>x.id===b.dataset.i);if(!m)return;
+ if(a==='test'){if(!can())return;tab('test');$('#cSel').value=m.id;pickModel()}
+ if(a==='edit')editDlg(m);
+ if(a==='dep'){await call('update_model',{id:m.id,deployed:!m.deployed});loadModels()}
+ if(a==='list'){await call('update_model',{id:m.id,listed:!m.listed});loadModels()}
+ if(a==='del')confirmDlg(`Permanently delete “${esc(m.name)}” and its stored weights?`,async()=>{await call('delete_model',{id:m.id});loadModels()})});
+function editDlg(m){const s=m.settings;dlg(`<h2>Set up “${esc(m.name)}”</h2><label>Name</label><input id="eN" value="${esc(m.name)}" maxlength="40"><label>Description</label><input id="eD" value="${esc(s.desc||'')}" maxlength="140"><div class="row"><div><label>Temperature</label><input id="eT" type="number" step="0.05" min="0.1" max="2" value="${s.temp}"></div><div><label>Top-K</label><input id="eK" type="number" min="1" max="200" value="${s.topK}"></div><div><label>Top-P</label><input id="eP" type="number" step="0.05" min="0.1" max="1" value="${s.topP}"></div><div><label>Max tokens</label><input id="eM" type="number" min="8" max="300" value="${s.maxTok}"></div></div><button class="btn" id="eS">Save</button><button class="btn sec" data-x>Cancel</button><div class="err" id="eE"></div>`,c=>$('#eS').onclick=async()=>{
+  try{await call('update_model',{id:m.id,name:$('#eN').value,settings:{desc:$('#eD').value,temp:+$('#eT').value,topK:+$('#eK').value,topP:+$('#eP').value,maxTok:+$('#eM').value}});c();loadModels()}catch(x){$('#eE').textContent=x.message}})}
+const can=()=>{if(!S){authDlg();return false}if(!A||!A.access){needSub();return false}return true};
+/* ---- create & deploy ---- */
+function normalize(o){if(o&&o.format==='nova-ai-backup'){const b=o.model;if(!b||!b.weights||!b.config||!b.vocabSize)throw Error('This backup contains no trained model');if(!o.tokenizer)throw Error('This backup has no tokenizer');
+ return{format:'nova-model',config:b.config,vocabSize:b.vocabSize,weights:b.weights,tokenizer:o.tokenizer,stepCount:b.stepCount||0,epochsDone:b.epochsDone||0,createdAt:o.createdAt}}
+ if(!o||o.format!=='nova-model')throw Error('Unrecognized file. Use nova-model.json or nova-full-backup.json from the Nova training site.');return o}
+async function drawCreate(){pending=null;$('#fImp').value='';$('#impInfo').textContent='';$('#stepName').classList.add('hide')}
+$('#fImp').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#impInfo').textContent='Reading…';
+ try{pending=normalize(JSON.parse(await f.text()));$('#impInfo').innerHTML=`<span class="ok">✓ Trained model found.</span> vocab ${nf(pending.vocabSize)} · ${nf(pending.stepCount||0)} training steps. The server validates and test-runs it on upload.`;$('#stepName').classList.remove('hide')}
+ catch(x){pending=null;$('#stepName').classList.add('hide');$('#impInfo').innerHTML=`<span class="err">${esc(x.message)}</span>`}};
+$('#bCreate').onclick=async()=>{$('#dMsg').textContent='';if(!pending)return;const name=$('#dName').value.trim();if(!name){$('#dMsg').textContent='Give your AI a name';return}if(!can())return;
+ const b=$('#bCreate');b.disabled=true;b.textContent='Uploading…';
+ try{const id='mdl_'+hex(5);await q(sb.storage.from('models').upload(`${S.id}/${id}.json`,new Blob([JSON.stringify(pending)],{type:'application/json'}),{contentType:'application/json'}));
+  b.textContent='Validating on server…';await call('register_model',{id,name,settings:{desc:$('#dDesc').value,temp:+$('#dTemp').value,topK:+$('#dTopK').value,topP:+$('#dTopP').value,maxTok:+$('#dMax').value}});
+  pending=null;tab('models')}catch(x){if(x.code==='subscription_required')needSub();else $('#dMsg').textContent=x.message}finally{b.disabled=false;b.textContent='Upload & deploy'}};
+/* ---- test: the playground runs the real model on the server and spends credits ---- */
+const addMsg=(r,t)=>{const d=document.createElement('div');d.className='m '+r;d.textContent=t;$('#msgs').appendChild(d);$('#msgs').scrollTop=1e9;return d};
+async function drawTest(){await fetchModels();$('#cSel').innerHTML=models.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');pickModel();
+ $('#cErr').textContent=A&&!A.access?'A subscription is required to test models.':'';$('#bSend').disabled=!models.length||!(A&&A.access)}
+function pickModel(){chatMsgs=[];$('#msgs').innerHTML=models.length?'':'<div class="small" style="padding:30px 0;text-align:center">Create a model first, then test it here.</div>';$('#cMeta').textContent=A&&A.access?nf(A.remaining)+' credits left':''}
+$('#cSel').onchange=pickModel;
+async function send(){const txt=$('#cIn').value.trim(),id=$('#cSel').value;if(!txt||!id||!can())return;$('#cErr').textContent='';$('#bSend').disabled=true;
+ chatMsgs.push({role:'user',content:txt});addMsg('u',txt);$('#cIn').value='';const w=addMsg('a','…');
+ try{const r=await call('chat',{modelId:id,messages:chatMsgs});chatMsgs.push({role:'assistant',content:r.reply});w.textContent=r.reply;
+  const g=document.createElement('details');g.className='gen';g.innerHTML=`<summary>Server run · ${nf(r.usage.credits_used)} credits</summary><div>${r.usage.prompt_tokens} prompt tokens → ${r.usage.completion_tokens} generated</div>`;w.appendChild(g);
+  $('#cMeta').textContent=nf(r.usage.credits_remaining)+' credits left';refreshAcct()}
+ catch(x){chatMsgs.pop();w.remove();$('#cErr').textContent=x.message;fail(x)}finally{$('#bSend').disabled=false}}
+$('#bSend').onclick=send;$('#cIn').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}};
+/* ---- API keys (hashes only are stored; the secret is shown once) ---- */
+async function loadKeys(){await refreshAcct();const ks=await q(sb.from('api_keys').select('id,name,prefix,created,last_used,revoked_at').order('created',{ascending:false}));const ok=A&&A.access;
+ $('#keysBox').innerHTML=`<div class="card"><h2>Create an API key</h2><div class="row"><div><input id="kName" placeholder="Key name, e.g. production" maxlength="40" ${ok?'':'disabled'}></div><div style="flex:0"><button class="btn" id="kMake" style="margin:0;white-space:nowrap" ${ok?'':'disabled'}>Create key</button></div></div>${ok?'':'<p class="lockmsg">A subscription is required to create API keys, and keys stop working whenever the subscription is not active.</p>'}<div class="err" id="kErr"></div></div>
+ <div class="card"><h2>Your keys</h2>${ks.length?`<div class="wrapx"><table><tr><th>Name</th><th>Key</th><th>Created</th><th>Last used</th><th></th></tr>${ks.map(k=>`<tr><td>${esc(k.name)}</td><td class="mono">${esc(k.prefix)}…</td><td>${fd(k.created)}</td><td>${fd(k.last_used)}</td><td>${k.revoked_at?'<span class="st">Revoked</span>':`<button class="btn sec" style="margin:0" data-k="${k.id}">Revoke</button>`}</td></tr>`).join('')}</table></div>`:'<p class="small">No keys yet.</p>'}</div>
+ <div class="card"><h2>Use the API</h2><p class="small">Server-to-server only. Never put a key in a web page or app. Each call runs your model on our servers and uses credits.</p><pre>curl -X POST ${esc(SBURL)}/functions/v1/v1 \\
+  -H "Authorization: Bearer nova_sk_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"model":"mdl_...","messages":[{"role":"user","content":"Hello"}]}'</pre></div>`;
+ if(ok)$('#kMake').onclick=async()=>{try{const r=await call('create_api_key',{name:$('#kName').value});dlg(`<h2>Your new API key</h2><p class="small">Copy it now. It is shown only once and can't be recovered.</p><pre>${esc(r.key)}</pre><button class="btn" id="kC">Copy key</button><button class="btn sec" data-x>Done</button>`,()=>$('#kC').onclick=()=>navigator.clipboard&&navigator.clipboard.writeText(r.key));loadKeys()}catch(x){$('#kErr').textContent=x.message;if(x.code==='subscription_required')needSub()}}}
+$('#keysBox').onclick=safe(async e=>{const id=e.target.dataset.k;if(id)confirmDlg('Revoke this key? Apps using it stop working immediately.',async()=>{await call('revoke_api_key',{id});loadKeys()})});
+/* ---- billing ---- */
+async function loadBilling(){await refreshAcct();const h=await q(sb.from('payments').select('*').order('created',{ascending:false}).limit(50)),st=A.status,per=A.access?A.granted:A.credits_per_period;
+ let rows=`<div class="stat"><span>Subscription</span><b>${badge(st)}</b></div>`;
+ if(st==='expired')rows+=`<div class="stat"><span>Expired on</span><b>${fd(A.period_end)}</b></div>`;
+ rows+=`<div class="stat"><span>Price</span><b>${(A.price_cents/100).toFixed(2).replace(/\.00$/,'')} ${esc(A.currency.toUpperCase())} / billing period (${esc(A.interval)})</b></div>`;
+ if(A.access){rows+=`<div class="stat"><span>Credits remaining</span><b>${nf(A.remaining)} / ${nf(per)}</b></div><div class="bar"><i style="width:${per?100*A.remaining/per:0}%"></i></div><div class="stat"><span>Current period</span><b>${fd(A.period_start)} → ${fd(A.period_end)}</b></div>`;
+  rows+=st==='cancelled'?`<div class="stat"><span>Renews</span><b>Off</b></div><div class="stat"><span>Access ends</span><b>${fd(A.period_end)}</b></div>`:`<div class="stat"><span>Next renewal</span><b>${fd(A.period_end)}</b></div>`;
+  rows+=`<div class="stat"><span>Auto-renew</span><b>${A.auto_renew?'On':'Off'}</b></div>`;
+  if(st==='past_due')rows+='<p class="small">Your last renewal payment failed. Access continues until the date above; the next credits are granted only when a payment succeeds.</p>'}
+ else{rows+=`<div class="stat"><span>Credits remaining</span><b>0 / ${nf(per)}</b></div>`;rows+=st==='expired'?'<p class="small"><b>Renew to continue using AI features.</b> Your account, models and billing history are kept.</p>':`<p class="small">${money()} gives ${nf(per)} credits each billing period.</p>`}
+ const act=!A.access?`<button class="btn" id="bSub">${st==='expired'?'Renew':'Subscribe'} · ${money()}</button>`:(A.auto_renew?'<button class="btn bad" id="bOff">Cancel auto-renew</button>':'<button class="btn" id="bOn">Resume auto-renew</button>');
+ $('#billBox').innerHTML=`<div class="card"><h2>Subscription</h2>${rows}${act}<div class="err" id="bErr"></div></div><div class="card"><h2>Billing history</h2>${h.length?`<div class="wrapx"><table><tr><th>Date</th><th>Subscription</th><th>Payment</th><th class="num">Amount</th><th>Status</th><th>Period</th><th>Type</th><th class="num">Credits granted</th></tr>${h.map(p=>`<tr><td>${fd(p.created)}</td><td class="mono">${esc(p.stripe_subscription_id)}</td><td class="mono">${esc(p.stripe_invoice_id)}</td><td class="num">${(p.amount_cents/100).toFixed(2)} ${esc(p.currency.toUpperCase())}</td><td>${p.status==='paid'?'Paid':'<span style="color:var(--bad)">Failed</span>'}</td><td>${p.period_start?fd(p.period_start)+' → '+fd(p.period_end):'—'}</td><td>${p.status==='failed'?'Payment failed':p.is_renewal?'Renewal':'New'}</td><td class="num">${p.credits_granted?nf(p.credits_granted)+'<div class="small">'+fd(p.credits_granted_at)+'</div>':'—'}</td></tr>`).join('')}</table></div>`:'<p class="small">No payments yet.</p>'}</div>`;
+ const go=(id,f)=>$(id)&&($(id).onclick=async()=>{try{await f();loadBilling()}catch(x){$('#bErr').textContent=x.message}});
+ go('#bSub',subscribe);go('#bOff',()=>call('set_renewal',{on:false}));go('#bOn',()=>call('set_renewal',{on:true}))}
+/* ---- setup + boot ---- */
+$('#sbSave').onclick=()=>{const url=$('#sbUrl').value.trim().replace(/\/+$/,''),key=$('#sbKey').value.trim();if(!/^https:\/\/.+/.test(url)||key.length<20){$('#sbMsg').textContent='Enter the project URL (https://….supabase.co) and the anon key';return}localStorage.setItem('novaSB',JSON.stringify({url,key}));location.reload()};
+(async()=>{const P=new URLSearchParams(location.search);if(P.get('paid')){try{sessionStorage.setItem('novaPaid','1')}catch(e){}}if(P.has('paid')||P.has('canceled'))history.replaceState(null,'',location.pathname);
+ if(!initSB()){tab('board');return}
+ try{const{data}=await sb.auth.getSession();if(data.session)await onSession(data.session.user)}catch(e){}
+ tab(S&&sessionStorage.getItem('novaPaid')?'billing':'board')})();
 
-    <header class="w-full max-w-7xl px-8 py-5 flex justify-between items-center border-b border-white/10">
-        <div class="flex items-center gap-3">
-            <div class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]"></div>
-            <span class="text-sm font-semibold tracking-[0.2em] uppercase text-white">Milo / Nova Dispatcher</span>
-        </div>
-        <span class="text-xs font-mono text-neutral-400">Zero-Auth Cloud Engine // Auto-Failover Nodes</span>
-    </header>
-
-    <main class="w-full max-w-6xl flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 p-6 items-center">
-        
-        <div class="md:col-span-5 glass-panel p-6 rounded-2xl flex flex-col gap-5">
-            <div>
-                <label class="block text-xs font-mono text-neutral-400 mb-2">TARGET CLOUD NODE</label>
-                <select id="spaceSelect" class="w-full bg-black/50 border border-white/10 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
-                    <option value="camenduru/LTX-Video">Node A: camenduru / LTX-Video (High Availability)</option>
-                    <option value="Lightricks/LTX-Video">Node B: Lightricks / Official LTX-Video Space</option>
-                    <option value="Kijai/HunyuanVideo-wrapper">Node C: Kijai / HunyuanVideo Wrapper</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-mono text-neutral-400 mb-2">VIDEO PROMPT</label>
-                <textarea id="promptInput" rows="3" class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors resize-none">Cinematic drone shot soaring through a neon cyberpunk Tokyo street alley during heavy rainfall, volumetric lighting, 4k.</textarea>
-            </div>
-
-            <button id="generateBtn" class="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm tracking-wide transition-all shadow-[0_0_30px_rgba(16,185,129,0.4)] cursor-pointer flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span id="btnText">Dispatch to Cloud Node</span>
-            </button>
-
-            <div id="progressWrapper" class="hidden flex-col gap-2">
-                <div class="flex justify-between text-xs font-mono text-neutral-400">
-                    <span id="progressStatus">Initializing worker stream...</span>
-                    <span class="animate-pulse text-emerald-400">Processing</span>
-                </div>
-                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                    <div id="progressBar" class="bg-emerald-500 h-full w-full animate-pulse"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="md:col-span-7 glass-panel p-6 rounded-2xl flex flex-col items-center justify-center relative min-h-[380px]">
-            <div id="placeholderView" class="text-center space-y-3">
-                <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-neutral-400">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                </div>
-                <h3 class="text-white font-medium text-lg">System Ready for Input</h3>
-                <p class="text-xs text-neutral-400 max-w-sm">Select a high-availability cloud node and click dispatch to queue your rendering request with zero setup.</p>
-            </div>
-
-            <div id="outputView" class="hidden w-full flex flex-col items-center gap-4">
-                <video id="resultVideo" controls autoplay loop class="w-full max-h-[320px] rounded-xl border border-white/10 shadow-2xl"></video>
-                <a id="downloadLink" download="milo_nova_rendered.mp4" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm tracking-wide transition-all text-center shadow-[0_0_25px_rgba(99,102,241,0.4)] flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    <span>Download Rendered File (.mp4)</span>
-                </a>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        const generateBtn = document.getElementById('generateBtn');
-        const btnText = document.getElementById('btnText');
-        const promptInput = document.getElementById('promptInput');
-        const spaceSelect = document.getElementById('spaceSelect');
-        const progressWrapper = document.getElementById('progressWrapper');
-        const progressStatus = document.getElementById('progressStatus');
-        const placeholderView = document.getElementById('placeholderView');
-        const outputView = document.getElementById('outputView');
-        const resultVideo = document.getElementById('resultVideo');
-        const downloadLink = document.getElementById('downloadLink');
-
-        generateBtn.addEventListener('click', async () => {
-            const promptText = promptInput.value;
-            const primarySpace = spaceSelect.value;
-            
-            // Setup fallback queue list
-            const spacesToTry = [
-                primarySpace,
-                "camenduru/LTX-Video",
-                "Lightricks/LTX-Video"
-            ];
-
-            generateBtn.disabled = true;
-            placeholderView.classList.add('hidden');
-            outputView.classList.add('hidden');
-            progressWrapper.classList.remove('hidden');
-            progressWrapper.classList.add('flex');
-
-            let success = false;
-
-            for (let space of spacesToTry) {
-                try {
-                    btnText.textContent = `Connecting to ${space.split('/')[1]}...`;
-                    progressStatus.textContent = `Establishing connection with ${space}...`;
-                    
-                    const app = await window.gradioClient(space);
-                    
-                    progressStatus.textContent = `Rendering video on ${space}... (please wait)`;
-                    
-                    const result = await app.predict("/infer", [
-                        promptText, 
-                        "", 
-                        25, 
-                        512, 
-                        512, 
-                        16
-                    ]);
-
-                    let videoUrl = null;
-                    if (result && result.data) {
-                        for (let item of result.data) {
-                            if (item && item.url) {
-                                videoUrl = item.url;
-                                break;
-                            } else if (typeof item === 'string' && (item.endsWith('.mp4') || item.endsWith('.webm') || item.includes('file='))) {
-                                videoUrl = item;
-                                break;
-                            } else if (item && item.file && item.file.url) {
-                                videoUrl = item.file.url;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (videoUrl) {
-                        resultVideo.src = videoUrl;
-                        downloadLink.href = videoUrl;
-                        progressWrapper.classList.remove('flex');
-                        progressWrapper.classList.add('hidden');
-                        outputView.classList.remove('hidden');
-                        success = true;
-                        break;
-                    }
-                } catch (err) {
-                    console.warn(`Node ${space} failed or busy, trying next node...`, err);
-                }
-            }
-
-            if (!success) {
-                progressStatus.textContent = "All public cloud nodes are currently congested.";
-                setTimeout(() => {
-                    alert("All public nodes are busy right now. Please try a different node option from the dropdown menu.");
-                    progressWrapper.classList.remove('flex');
-                    progressWrapper.classList.add('hidden');
-                    placeholderView.classList.remove('hidden');
-                }, 1000);
-            }
-
-            generateBtn.disabled = false;
-            btnText.textContent = "Dispatch to Cloud Node";
-        });
-    </script>
-</body>
-</html>
+</script></body></html>
