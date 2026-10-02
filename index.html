@@ -118,11 +118,11 @@ function authDlg(mode='in'){if(!sb){tab('board');return}dlg(`<h2>${mode==='in'?'
      if(!r.data.session){m.style.color='var(--ok)';m.textContent='Account created. Confirm the email we sent, then sign in.';return}}
     else{r=await sb.auth.signInWithPassword({email:e,password:p});if(r.error)throw r.error}
     c();await onSession(r.data.session.user);tab(PROTECTED.includes(cur)?cur:'models')}catch(x){m.style.color='';m.textContent=x.message}}})}
-async function onSession(u){let p=await q(sb.from('profiles').select('display_name').eq('id',u.id).maybeSingle());
- if(!p){const dn=((u.user_metadata&&u.user_metadata.display_name)||u.email.split('@')[0]).slice(0,40).padEnd(2,'_');await q(sb.from('profiles').insert({id:u.id,display_name:dn}));p={display_name:dn}}
+async function onSession(u){let p=await q(sb.from('deploy_profiles').select('display_name').eq('id',u.id).maybeSingle());
+ if(!p){const dn=((u.user_metadata&&u.user_metadata.display_name)||u.email.split('@')[0]).slice(0,40).padEnd(2,'_');await q(sb.from('deploy_profiles').insert({id:u.id,display_name:dn}));p={display_name:dn}}
  S={id:u.id,email:u.email,name:p.display_name};$('#whoTxt').textContent=S.email;$('#bAuth').textContent='Sign out';await refreshAcct();afterPay()}
 $('#bAuth').onclick=async()=>{if(S){await sb.auth.signOut();S=A=null;models=[];chatMsgs=[];$('#whoTxt').textContent='';$('#miniSub').innerHTML='';$('#bAuth').textContent='Sign in';drawBanner();tab('board')}else authDlg()};
-async function refreshAcct(){A=S?await q(sb.rpc('my_account')):null;
+async function refreshAcct(){A=S?await q(sb.rpc('deploy_my_account')):null;
  $('#miniSub').innerHTML=A?`<div>${badge(A.status)}</div><div class="small" style="margin:4px 0">${nf(A.remaining)} credits left</div>`:'';drawBanner()}
 function drawBanner(){const el=$('#banner');if(!S||!A||A.access||cur==='board'){el.classList.add('hide');return}
  el.classList.remove('hide');el.innerHTML=`<b>Subscription required.</b> ${A.status==='expired'?'Your subscription expired on '+fd(A.period_end)+'. ':''}Creating, testing, deploying and the API are locked until you subscribe. <button class="btn" id="bSubNow">${A.status==='expired'?'Renew':'Subscribe'} · ${money()}</button>`;$('#bSubNow').onclick=()=>subscribe().catch(fail)}
@@ -138,12 +138,12 @@ function tab(t){if(PROTECTED.includes(t)&&!S)return authDlg();cur=t;
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.t)};
 /* ---- leaderboard: public data only; there is no run/test path for other people's models ---- */
 async function loadBoard(){$('#sbSetup').classList.toggle('hide',!!sb);if(!sb){$('#boardBox').innerHTML='';return}
- const rows=await q(sb.rpc('leaderboard',{p_limit:50}));
+ const rows=await q(sb.rpc('deploy_leaderboard',{p_limit:50}));
  $('#boardBox').innerHTML=rows.length?`<div class="wrapx"><table><tr><th>#</th><th>Model</th><th>Creator</th><th>Version</th><th class="num">Replies</th><th class="num">Avg latency</th><th class="num">Training steps</th><th class="num">Parameters</th></tr>${rows.map(r=>`<tr class="row-click" data-id="${esc(r.model_id)}"><td>${r.rank}</td><td><b>${esc(r.name)}</b></td><td>${esc(r.creator)}</td><td class="mono">${esc(r.version)}</td><td class="num">${nf(r.replies)}</td><td class="num">${r.avg_ms==null?'—':r.avg_ms+' ms'}</td><td class="num">${r.steps==null?'—':nf(r.steps)}</td><td class="num">${r.params==null?'—':nf(r.params)}</td></tr>`).join('')}</table></div>`:'<div class="card small">No public models yet.</div>'}
-$('#boardBox').onclick=safe(async e=>{const tr=e.target.closest('tr[data-id]');if(!tr)return;const m=await q(sb.rpc('public_model_info',{p_id:tr.dataset.id}));if(!m)return;
+$('#boardBox').onclick=safe(async e=>{const tr=e.target.closest('tr[data-id]');if(!tr)return;const m=await q(sb.rpc('deploy_public_model_info',{p_id:tr.dataset.id}));if(!m)return;
  dlg(`<h2>${esc(m.name)}</h2><p class="small">${esc(m.description||'No description.')}</p><div class="stat"><span>Creator</span><b>${esc(m.creator)}</b></div><div class="stat"><span>Version</span><b>${esc(m.version)}</b></div><div class="stat"><span>Replies served</span><b>${nf(m.replies)}</b></div><div class="stat"><span>Training steps</span><b>${nf(m.steps)}</b></div><div class="stat"><span>Epochs</span><b>${nf(m.epochs)}</b></div><div class="stat"><span>Parameters</span><b>${nf(m.params)}</b></div><div class="stat"><span>Published</span><b>${fd(m.created)}</b></div><p class="lockmsg">Public information only. Only the creator can run this model.</p><button class="btn sec" data-x>Close</button>`)});
 /* ---- my models ---- */
-async function fetchModels(){models=await q(sb.from('models').select('id,name,version,created,source,settings,deployed,listed').order('created'))}
+async function fetchModels(){models=await q(sb.from('deploy_models').select('id,name,version,created,source,settings,deployed,listed').order('created'))}
 async function loadModels(){await fetchModels();$('#mList').innerHTML=models.length?models.map(m=>`<div class="card"><h2>${esc(m.name)} <span class="st ${m.deployed?'active':'none'}">${m.deployed?'Deployed':'Not deployed'}</span> ${m.listed?'':'<span class="st">Unlisted</span>'}</h2><div class="small">${esc(m.settings.desc||'')}</div>
  <div class="stat"><span>Model ID</span><b>${m.id}</b></div><div class="stat"><span>Version</span><b>${esc(m.version)}</b></div><div class="stat"><span>Parameters</span><b>${nf(m.source.params)}</b></div><div class="stat"><span>Training steps</span><b>${nf(m.source.steps)}</b></div>
  <button class="btn" data-a="test" data-i="${m.id}">Test</button><button class="btn sec" data-a="edit" data-i="${m.id}">Set up</button><button class="btn sec" data-a="dep" data-i="${m.id}">${m.deployed?'Undeploy':'Deploy'}</button><button class="btn sec" data-a="list" data-i="${m.id}">${m.listed?'Unlist':'List publicly'}</button><button class="btn bad" data-a="del" data-i="${m.id}">Delete</button></div>`).join(''):'<div class="card small">No models yet. Use <b>Create &amp; deploy</b> to import one trained on Nova.</div>'}
@@ -166,7 +166,7 @@ $('#fImp').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#impInfo
  catch(x){pending=null;$('#stepName').classList.add('hide');$('#impInfo').innerHTML=`<span class="err">${esc(x.message)}</span>`}};
 $('#bCreate').onclick=async()=>{$('#dMsg').textContent='';if(!pending)return;const name=$('#dName').value.trim();if(!name){$('#dMsg').textContent='Give your AI a name';return}if(!can())return;
  const b=$('#bCreate');b.disabled=true;b.textContent='Uploading…';
- try{const id='mdl_'+hex(5);await q(sb.storage.from('models').upload(`${S.id}/${id}.json`,new Blob([JSON.stringify(pending)],{type:'application/json'}),{contentType:'application/json'}));
+ try{const id='mdl_'+hex(5);await q(sb.storage.from('nova-deploy-models').upload(`${S.id}/${id}.json`,new Blob([JSON.stringify(pending)],{type:'application/json'}),{contentType:'application/json'}));
   b.textContent='Validating on server…';await call('register_model',{id,name,settings:{desc:$('#dDesc').value,temp:+$('#dTemp').value,topK:+$('#dTopK').value,topP:+$('#dTopP').value,maxTok:+$('#dMax').value}});
   pending=null;tab('models')}catch(x){if(x.code==='subscription_required')needSub();else $('#dMsg').textContent=x.message}finally{b.disabled=false;b.textContent='Upload & deploy'}};
 /* ---- test: the playground runs the real model on the server and spends credits ---- */
@@ -183,7 +183,7 @@ async function send(){const txt=$('#cIn').value.trim(),id=$('#cSel').value;if(!t
  catch(x){chatMsgs.pop();w.remove();$('#cErr').textContent=x.message;fail(x)}finally{$('#bSend').disabled=false}}
 $('#bSend').onclick=send;$('#cIn').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}};
 /* ---- API keys (hashes only are stored; the secret is shown once) ---- */
-async function loadKeys(){await refreshAcct();const ks=await q(sb.from('api_keys').select('id,name,prefix,created,last_used,revoked_at').order('created',{ascending:false}));const ok=A&&A.access;
+async function loadKeys(){await refreshAcct();const ks=await q(sb.from('deploy_api_keys').select('id,name,prefix,created,last_used,revoked_at').order('created',{ascending:false}));const ok=A&&A.access;
  $('#keysBox').innerHTML=`<div class="card"><h2>Create an API key</h2><div class="row"><div><input id="kName" placeholder="Key name, e.g. production" maxlength="40" ${ok?'':'disabled'}></div><div style="flex:0"><button class="btn" id="kMake" style="margin:0;white-space:nowrap" ${ok?'':'disabled'}>Create key</button></div></div>${ok?'':'<p class="lockmsg">A subscription is required to create API keys, and keys stop working whenever the subscription is not active.</p>'}<div class="err" id="kErr"></div></div>
  <div class="card"><h2>Your keys</h2>${ks.length?`<div class="wrapx"><table><tr><th>Name</th><th>Key</th><th>Created</th><th>Last used</th><th></th></tr>${ks.map(k=>`<tr><td>${esc(k.name)}</td><td class="mono">${esc(k.prefix)}…</td><td>${fd(k.created)}</td><td>${fd(k.last_used)}</td><td>${k.revoked_at?'<span class="st">Revoked</span>':`<button class="btn sec" style="margin:0" data-k="${k.id}">Revoke</button>`}</td></tr>`).join('')}</table></div>`:'<p class="small">No keys yet.</p>'}</div>
  <div class="card"><h2>Use the API</h2><p class="small">Server-to-server only. Never put a key in a web page or app. Each call runs your model on our servers and uses credits.</p><pre>curl -X POST ${esc(SBURL)}/functions/v1/v1 \\
@@ -193,7 +193,7 @@ async function loadKeys(){await refreshAcct();const ks=await q(sb.from('api_keys
  if(ok)$('#kMake').onclick=async()=>{try{const r=await call('create_api_key',{name:$('#kName').value});dlg(`<h2>Your new API key</h2><p class="small">Copy it now. It is shown only once and can't be recovered.</p><pre>${esc(r.key)}</pre><button class="btn" id="kC">Copy key</button><button class="btn sec" data-x>Done</button>`,()=>$('#kC').onclick=()=>navigator.clipboard&&navigator.clipboard.writeText(r.key));loadKeys()}catch(x){$('#kErr').textContent=x.message;if(x.code==='subscription_required')needSub()}}}
 $('#keysBox').onclick=safe(async e=>{const id=e.target.dataset.k;if(id)confirmDlg('Revoke this key? Apps using it stop working immediately.',async()=>{await call('revoke_api_key',{id});loadKeys()})});
 /* ---- billing ---- */
-async function loadBilling(){await refreshAcct();const h=await q(sb.from('payments').select('*').order('created',{ascending:false}).limit(50)),st=A.status,per=A.access?A.granted:A.credits_per_period;
+async function loadBilling(){await refreshAcct();const h=await q(sb.from('deploy_payments').select('*').order('created',{ascending:false}).limit(50)),st=A.status,per=A.access?A.granted:A.credits_per_period;
  let rows=`<div class="stat"><span>Subscription</span><b>${badge(st)}</b></div>`;
  if(st==='expired')rows+=`<div class="stat"><span>Expired on</span><b>${fd(A.period_end)}</b></div>`;
  rows+=`<div class="stat"><span>Price</span><b>${(A.price_cents/100).toFixed(2).replace(/\.00$/,'')} ${esc(A.currency.toUpperCase())} / billing period (${esc(A.interval)})</b></div>`;
