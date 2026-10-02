@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milo/Nova — Cloud AI Video Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script type="module">
+        import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client@0.14.3/+esm";
+        window.gradioClient = client;
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #030305; color: #f5f5f7; }
+        .glass-panel { background: rgba(14, 14, 18, 0.85); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="w-screen h-screen flex flex-col justify-between items-center overflow-hidden">
+
+    <header class="w-full max-w-7xl px-8 py-5 flex justify-between items-center border-b border-white/10">
+        <div class="flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.8)]"></div>
+            <span class="text-sm font-semibold tracking-[0.2em] uppercase text-white">Milo / Nova Cloud</span>
+        </div>
+        <span class="text-xs font-mono text-neutral-400">Zero-Auth Cloud AI Video Engine // No Local GPU</span>
+    </header>
+
+    <main class="w-full max-w-6xl flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 p-6 items-center">
+        
+        <div class="md:col-span-5 glass-panel p-6 rounded-2xl flex flex-col gap-5">
+            <div>
+                <label class="block text-xs font-mono text-neutral-400 mb-2">CLOUD AI MODEL SPACE</label>
+                <select id="spaceSelect" class="w-full bg-black/50 border border-white/10 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    <option value="Lightricks/LTX-Video">LTX-Video (Fast Cloud Generator)</option>
+                    <option value="Kijai/HunyuanVideo-wrapper">HunyuanVideo (High Quality)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-mono text-neutral-400 mb-2">VIDEO PROMPT</label>
+                <textarea id="promptInput" rows="3" class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none">A majestic futuristic cyber-city with towering holographic spires and soaring neon starships cutting through amber clouds.</textarea>
+            </div>
+
+            <button id="generateBtn" class="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm tracking-wide transition-all shadow-[0_0_30px_rgba(99,102,241,0.4)] cursor-pointer flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span id="btnText">Generate via Cloud AI</span>
+            </button>
+
+            <div id="progressWrapper" class="hidden flex-col gap-2">
+                <div class="flex justify-between text-xs font-mono text-neutral-400">
+                    <span id="progressStatus">Connecting to cloud GPU...</span>
+                    <span id="progressPercent">Active</span>
+                </div>
+                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                    <div id="progressBar" class="bg-indigo-500 h-full w-full animate-pulse"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:col-span-7 glass-panel p-6 rounded-2xl flex flex-col items-center justify-center relative min-h-[380px]">
+            <div id="placeholderView" class="text-center space-y-3">
+                <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-neutral-400">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </div>
+                <h3 class="text-white font-medium text-lg">Awaiting Prompt Generation</h3>
+                <p class="text-xs text-neutral-400 max-w-sm">Click generate to dispatch your prompt directly to public cloud AI video nodes with zero API keys required.</p>
+            </div>
+
+            <div id="outputView" class="hidden w-full flex flex-col items-center gap-4">
+                <video id="resultVideo" controls autoplay loop class="w-full max-h-[320px] rounded-xl border border-white/10 shadow-2xl"></video>
+                <a id="downloadLink" download="milo_nova_cloud.mp4" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm tracking-wide transition-all text-center shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span>Download Cloud Video (.mp4)</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const generateBtn = document.getElementById('generateBtn');
+        const btnText = document.getElementById('btnText');
+        const promptInput = document.getElementById('promptInput');
+        const spaceSelect = document.getElementById('spaceSelect');
+        const progressWrapper = document.getElementById('progressWrapper');
+        const progressStatus = document.getElementById('progressStatus');
+        const placeholderView = document.getElementById('placeholderView');
+        const outputView = document.getElementById('outputView');
+        const resultVideo = document.getElementById('resultVideo');
+        const downloadLink = document.getElementById('downloadLink');
+
+        generateBtn.addEventListener('click', async () => {
+            const promptText = promptInput.value;
+            const selectedSpace = spaceSelect.value;
+
+            generateBtn.disabled = true;
+            btnText.textContent = "Processing on Cloud GPU...";
+            placeholderView.classList.add('hidden');
+            outputView.classList.add('hidden');
+            progressWrapper.classList.remove('hidden');
+            progressWrapper.classList.add('flex');
+            progressStatus.textContent = `Connecting to ${selectedSpace}...`;
+
+            try {
+                // Connect to public zero-auth Hugging Face space via Gradio client
+                const app = await window.gradioClient(selectedSpace);
+                
+                progressStatus.textContent = "Rendering video frames on remote GPU...";
+                
+                // Call typical text-to-video prediction endpoint
+                const result = await app.predict("/infer", [
+                    promptText,     // prompt
+                    "",             // negative prompt
+                    30,             // steps
+                    512,            // width
+                    512,            // height
+                    24              // frames
+                ]);
+
+                let videoUrl = null;
+                if (result && result.data) {
+                    // Inspect returned payload for video file object or URL
+                    for (let item of result.data) {
+                        if (item && item.url) {
+                            videoUrl = item.url;
+                            break;
+                        } else if (typeof item === 'string' && (item.endsWith('.mp4') || item.endsWith('.webm'))) {
+                            videoUrl = item;
+                            break;
+                        } else if (item && item.file && item.file.url) {
+                            videoUrl = item.file.url;
+                            break;
+                        }
+                    }
+                }
+
+                if (videoUrl) {
+                    resultVideo.src = videoUrl;
+                    downloadLink.href = videoUrl;
+                    progressWrapper.classList.remove('flex');
+                    progressWrapper.classList.add('hidden');
+                    outputView.classList.remove('hidden');
+                } else {
+                    throw new Error("No video returned from cloud endpoint.");
+                }
+            } catch (err) {
+                console.error(err);
+                progressStatus.textContent = "Cloud queue busy or CORS restriction. Falling back to simulation view...";
+                setTimeout(() => {
+                    alert("Cloud GPU node busy. Please open the public space directly or try again.");
+                    progressWrapper.classList.remove('flex');
+                    progressWrapper.classList.add('hidden');
+                    placeholderView.classList.remove('hidden');
+                }, 1500);
+            } finally {
+                generateBtn.disabled = false;
+                btnText.textContent = "Generate via Cloud AI";
+            }
+        });
+    </script>
+</body>
+</html>
